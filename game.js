@@ -16,9 +16,24 @@ var manifest = {
             "frames": 1,
             "msPerFrame": 100
         },
-        "holder":{
+        "player1":{
         	"strip": "animations/mouseSmallSide1.png",
             "frames": 1,
+            "msPerFrame": 100
+        },
+        "player2":{
+        	"strip": "animations/mouseSmallSide1P2.png",
+            "frames": 1,
+            "msPerFrame": 100
+        },
+        "mouseThrow":{
+        	"strip": "animations/mouseThrow.png",
+            "frames": 3,
+            "msPerFrame": 100
+        },
+        "mouseThrow2":{
+        	"strip": "animations/mouseThrowP2.png",
+            "frames": 3,
             "msPerFrame": 100
         }
 	}
@@ -32,7 +47,15 @@ function centerText(context, text, offsetX, offsetY) {
 	var y = offsetY | 0;
 	context.fillText(text, x, y);
 }
-
+function throwTimer(player,sprite){
+	console.log("here");
+	return new Splat.Timer(function(){}, 300,function(){
+		console.log(this);
+		this.stop();
+		this.reset();
+		player.sprite = sprite;
+	});
+}
 game.scenes.add("title", new Splat.Scene(canvas, function() {
 	// initialization
 
@@ -56,58 +79,51 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
 	// initialization
-
 	//declare images
 	var bgImage = game.animations.get("background");
-	var holderImage = game.animations.get("holder");
-	var holderImage2 =game.animations.get("holder").copy();
-	holderImage2.flipHorizontally();
+	//var mouseThrow = game.animations.get("mouseThrow");
+	var p1Img = game.animations.get("player1");
+	var p2Img = game.animations.get("player2");
 
 	//create entities
 	this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
+	//player1
+	this.player1 = new Splat.AnimatedEntity(0,this.canvas.height/2 -p1Img.height/2,p1Img.width,p1Img.height,p1Img,0,0);
+	this.player1.arsenal = [
+		{
+			weapon:"weapon1"
+		},
+		{
+			weapon:"weapon2"
+		},
+		{
+			weapon:"weapon3"
+		}
+	];
+	this.player1.selectedWeapon = 0;
+
+	//player2	
+	this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width,p2Img.height,p2Img,0,0);
+	this.player2.arsenal = [
+		{
+			weapon:"weapon1"
+		},
+		{
+			weapon:"weapon2"
+		},
+		{
+			weapon:"weapon3"
+		}
+	];
+	this.player2.selectedWeapon = 0;
 
 	//define scene variables
 	this.upperbound = 70;
 	this.lowerbound = canvas.height - 70;
-	this.player1 = {
-		x:0,
-		y:this.canvas.height/2 -10,
-		width:holderImage.width,
-		height:holderImage.height,
-		get sprite(){
-		 return new Splat.AnimatedEntity(this.x,this.y,this.width,this.height,holderImage,0,0);
-		}, 
-		arsenal:[{
-			weapon:"weapon1"
-		},
-		{
-			weapon:"weapon2"
-		},
-		{
-			weapon:"weapon3"
-		}],
-		selectedWeapon:0
-	};
-	this.player2 = {
-		x:canvas.width - holderImage2.width,
-		y:this.canvas.height/2 -holderImage2.height/2,
-		width:holderImage2.width,
-		height:holderImage2.height,
-		get sprite(){
-		 return new Splat.AnimatedEntity(this.x,this.y,this.width,this.height,holderImage2,0,0);
-		},arsenal:[{
-			weapon:"weapon1"
-		},
-		{
-			weapon:"weapon2"
-		},
-		{
-			weapon:"weapon3"
-		}],
-		selectedWeapon:0
-	};
 	this.playerSpeed = 2;
-}, function() {
+	this.timers.p1Throw = throwTimer(this.player1,p1Img);
+	this.timers.p2Throw = throwTimer(this.player2,p2Img);
+}, function(elapsedMillis) {
 	// simulation
 
 	///////player 1 controls
@@ -119,15 +135,17 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	}
 	if (game.keyboard.consumePressed("d")){
 		console.log("fire1");
+		this.timers.p1Throw.start();
+		this.player1.sprite = game.animations.get("mouseThrow");
+		
+		
 		//TODO:fire projectile
 	}
 	if (game.keyboard.consumePressed("a")){
-		console.log("switch");
 		this.player1.selectedWeapon +=1;
 		if(this.player1.selectedWeapon > 2){
 			this.player1.selectedWeapon = 0;
 		}
-		console.log(this.player1.arsenal[this.player1.selectedWeapon].weapon);
 	}
 	//////player 2 controls
 	if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
@@ -138,16 +156,19 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	}
 	if (game.keyboard.consumePressed("left")){
 		console.log("fire2");
+
+		this.player2.sprite = game.animations.get("mouseThrow2");
+		this.timers.p2Throw.start();
 		//TODO:fire projectile
 	}
 	if (game.keyboard.consumePressed("right")){
-		console.log("switch");
 		this.player2.selectedWeapon +=1;
 		if(this.player2.selectedWeapon > 2){
 			this.player2.selectedWeapon = 0;
 		}
-		console.log(this.player2.arsenal[this.player2.selectedWeapon].weapon);
 	}
+	this.player1.move(elapsedMillis);
+	this.player2.move(elapsedMillis);
 }, function(context) {
 	// draw
 	context.fillStyle = "#092fff";
@@ -156,8 +177,33 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	context.fillStyle = "#ff0000";
 	//context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
 	//context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
-	this.player1.sprite.draw(context);
-	this.player2.sprite.draw(context);
+	
+	this.player1.draw(context);
+	this.player2.draw(context);	
+	switch(this.player1.selectedWeapon){
+		case 0:
+			context.fillStyle = "#ff0000";
+			break;
+		case 1:
+			context.fillStyle = "#00ff00";
+			break;
+		case 2:
+			context.fillStyle = "#0000ff";
+			break;
+	}
+	context.fillRect(50,canvas.height- 50,20,20);
+	switch(this.player2.selectedWeapon){
+		case 0:
+			context.fillStyle = "#ff0000";
+			break;
+		case 1:
+			context.fillStyle = "#00ff00";
+			break;
+		case 2:
+			context.fillStyle = "#0000ff";
+			break;
+	}
+	context.fillRect(canvas.width -70,canvas.height-50,20,20);
 	//context.font = "25px helvetica";
 	//centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
 }));
