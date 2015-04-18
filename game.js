@@ -1,17 +1,18 @@
+/*jslint debug: true */
 "use strict";
 
 var Splat = require("splatjs");
 var canvas = document.getElementById("canvas");
 
 var manifest = {
-	"images": {
-	},
-	"sounds": {
-	},
-	"fonts": {
-	},
-	"animations": {
-		"background": {
+    "images": {
+    },
+    "sounds": {
+    },
+    "fonts": {
+    },
+    "animations": {
+	"background": {
             "strip": "animations/board.png",
             "frames": 1,
             "msPerFrame": 100
@@ -36,16 +37,35 @@ var manifest = {
             "frames": 3,
             "msPerFrame": 100
         }
-	}
+    }
 };
 
 var game = new Splat.Game(canvas, manifest);
 
 function centerText(context, text, offsetX, offsetY) {
-	var w = context.measureText(text).width;
-	var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
-	var y = offsetY | 0;
-	context.fillText(text, x, y);
+    var w = context.measureText(text).width;
+    var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
+    var y = offsetY | 0;
+    context.fillText(text, x, y);
+}
+
+function chuck(player, vx) {
+    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get("holder"), 10, 10);
+    projectile.vx = vx;
+    projectile.vy = 0;
+    player.projectiles.push(projectile);
+}
+
+function chucker(player, context) {
+    player.projectiles.forEach(function (projectile) {
+        projectile.draw(context);
+    });
+}
+
+function chucking(player, elapsedMillis) {
+    player.projectiles.forEach(function (projectile) {
+        projectile.move(elapsedMillis);
+    });
 }
 function throwTimer(player,sprite){
 	console.log("here");
@@ -57,27 +77,28 @@ function throwTimer(player,sprite){
 	});
 }
 game.scenes.add("title", new Splat.Scene(canvas, function() {
-	// initialization
+    // initialization
 
 }, function() {
-	// simulation
-	if(game.mouse.consumePressed(0)){
-		game.scenes.switchTo("main");
-	}
-	// this.buttons.push( new Splat.Button(game.mouse,canvas.width/2 - playBtnImage.width/2,220 + canvas.height/2 - playBtnImage.height/2, { normal: playBtnImage, pressed: playBtnImage }, function(state) {
-	// 	if (state === "pressed"){
-	// 	}
-	// }));
+    // simulation
+    if(game.mouse.consumePressed(0)){
+	game.scenes.switchTo("main");
+    }
+    // this.buttons.push( new Splat.Button(game.mouse,canvas.width/2 - playBtnImage.width/2,220 + canvas.height/2 - playBtnImage.height/2, { normal: playBtnImage, pressed: playBtnImage }, function(state) {
+    // 	if (state === "pressed"){
+    // 	}
+    // }));
 }, function(context) {
-	// draw
-	context.fillStyle = "#092227";
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = "#fff";
-	context.font = "25px helvetica";
-	centerText(context, "Hello Splat", 0, canvas.height / 2 - 13);
+    // draw
+    context.fillStyle = "#092227";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#fff";
+    context.font = "25px helvetica";
+    centerText(context, "Hello Splat", 0, canvas.height / 2 - 13);
 }));
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
+<<<<<<< HEAD
 	// initialization
 	//declare images
 	var bgImage = game.animations.get("background");
@@ -101,6 +122,11 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		}
 	];
 	this.player1.selectedWeapon = 0;
+	selectedWeapon:0,
+        chuck:function () {
+            chuck(this, 1);
+        },
+        projectiles:[]
 
 	//player2	
 	this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width,p2Img.height,p2Img,0,0);
@@ -116,6 +142,11 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		}
 	];
 	this.player2.selectedWeapon = 0;
+	selectedWeapon:0,
+        chuck:function () {
+            chuck(this, 1);
+        },
+        projectiles:[]
 
 	//define scene variables
 	this.upperbound = 70;
@@ -125,7 +156,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	this.timers.p2Throw = throwTimer(this.player2,p2Img);
 }, function(elapsedMillis) {
 	// simulation
-
+	chucking(this.player1, elapsedMillis);
+    chucking(this.player2, elapsedMillis);
 	///////player 1 controls
 	if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
 		this.player1.y -= this.playerSpeed;
@@ -137,7 +169,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		console.log("fire1");
 		this.timers.p1Throw.start();
 		this.player1.sprite = game.animations.get("mouseThrow");
-		
+		this.player1.chuck();
 		
 		//TODO:fire projectile
 	}
@@ -159,6 +191,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 
 		this.player2.sprite = game.animations.get("mouseThrow2");
 		this.timers.p2Throw.start();
+		this.player2.chuck();
 		//TODO:fire projectile
 	}
 	if (game.keyboard.consumePressed("right")){
@@ -204,8 +237,11 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 			break;
 	}
 	context.fillRect(canvas.width -70,canvas.height-50,20,20);
+	chucker(this.player1, context);
+    chucker(this.player2, context);
 	//context.font = "25px helvetica";
 	//centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
+
 }));
 
 
