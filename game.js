@@ -79,10 +79,11 @@ function throwTimer(player,sprite){
 }
 
 function hitting(player) {
-    var hits = player.sprite.getCollisions(player.nemesis.projectiles);
-    if (hits.length > 0) {
+    var projectile = player.nemesis.projectiles.slice(-1);
+    var hits = player.collides(projectile);
+    if (hits) {
         console.log("OUCH!!!!");
-        delete hits[0];
+        player.nemsis.projectiles = [];
     }
 }
 
