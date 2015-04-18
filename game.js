@@ -46,15 +46,18 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
 	// initialization
+
+	this.upperbound = 100;
+	this.lowerbound = canvas.height - 100;
 	this.player1 = {
 		x:100,
-		y:0,
+		y:this.canvas.height/2 -10,
 		width:20,
 		height:20
 	};
 	this.player2 = {
 		x:canvas.width - 120,
-		y:0,
+		y:this.canvas.height/2 -10,
 		width:20,
 		height:20
 	};
@@ -63,10 +66,10 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	// simulation
 
 	///////player 1 controls
-	if (game.keyboard.isPressed("w")){
+	if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
 		this.player1.y -= this.playerSpeed;
 	}
-	if (game.keyboard.isPressed("s")){
+	if (game.keyboard.isPressed("s") && this.player1.y < this.lowerbound){
 		this.player1.y += this.playerSpeed;
 	}
 	if (game.keyboard.consumePressed("d")){
@@ -74,10 +77,10 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		//TODO:fire projectile
 	}
 	//////player 2 controls
-	if (game.keyboard.isPressed("up")){
+	if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
 		this.player2.y -= this.playerSpeed;
 	}
-	if (game.keyboard.isPressed("down")){
+	if (game.keyboard.isPressed("down") && this.player2.y < this.lowerbound){
 		this.player2.y += this.playerSpeed;
 	}
 	if (game.keyboard.consumePressed("left")){
