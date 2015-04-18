@@ -47,6 +47,12 @@ var manifest = {
             "frames": 2,
             "msPerFrame": 70,
             "flip":"vertical"
+        },
+        "hotdog":{
+        	"strip": "animations/hotDog.png",
+            "frames": 2,
+            "msPerFrame": 70,
+            "flip":"vertical"
         }
 
     }
@@ -82,7 +88,6 @@ function chucking(player, elapsedMillis) {
 function throwTimer(player,sprite){
 	console.log("here");
 	return new Splat.Timer(function(){}, 300,function(){
-		console.log(this);
 		this.stop();
 		this.reset();
 		player.sprite = sprite;
@@ -118,6 +123,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	var p2Img = game.animations.get("player2");
 	this.upAnim = game.animations.get("mouseUp");
 	this.downAnim = game.animations.get("mouseDown");
+	this.hotdogImg = game.animations.get("hotdog");
 
 	//create entities
 	this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
@@ -184,7 +190,6 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		this.player1.sprite = game.animations.get("player1");
 	}
 	if (game.keyboard.consumePressed("d") && !game.keyboard.isPressed("w") && !game.keyboard.isPressed("s")){
-		console.log("fire1");
 		this.timers.p1Throw.start();
 		this.player1.sprite = game.animations.get("mouseThrow");
 		this.player1.chuck();
@@ -210,7 +215,6 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		this.player2.sprite = game.animations.get("player2");
 	}
 	if (game.keyboard.consumePressed("left")&& !game.keyboard.isPressed("up") && !game.keyboard.isPressed("down")){
-		console.log("fire2");
 
 		this.player2.sprite = game.animations.get("mouseThrow2");
 		this.timers.p2Throw.start();
