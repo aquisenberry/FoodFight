@@ -1,7 +1,7 @@
 {
-  "name": "blank-splatjs-project",
-  "version": "0.0.0",
-  "description": "Blank SplatJS Project",
+  "name": "A Mousy Food Fight",
+  "version": "0.0.1",
+  "description": "Video Game Created for Ludum Dare 32. The Theme is Unconventional Weapon",
   "main": "index.js",
   "private": true,
   "dependencies": {
@@ -16,7 +16,7 @@
     "build-js": "browserify game.js -o index.js",
     "build": "npm run lint-js && npm run build-js"
   },
-  "author": "Eric Lathrop <eric@ericlathrop.com> (http://ericlathrop.com)",
+  "author": "Anthony Quisenberry <anthony.quisenberry01@gmail.com> (http://anthonyquisenberry.com),Clay Morton <lyonsclay@yahoo.com>,Kira Winters <klwint02@gmail.com>",
   "license": "MIT",
   "jshintConfig": {
     "camelcase": true,
