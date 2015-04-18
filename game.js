@@ -36,7 +36,19 @@ var manifest = {
         	"strip": "animations/mouseThrowP2.png",
             "frames": 3,
             "msPerFrame": 100
+        },
+        "mouseUp":{
+        	"strip": "animations/mouseUp.png",
+            "frames": 2,
+            "msPerFrame": 70
+        },
+        "mouseDown":{
+        	"strip": "animations/mouseUp.png",
+            "frames": 2,
+            "msPerFrame": 70,
+            "flip":"vertical"
         }
+
     }
 };
 
@@ -104,6 +116,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	//var mouseThrow = game.animations.get("mouseThrow");
 	var p1Img = game.animations.get("player1");
 	var p2Img = game.animations.get("player2");
+	this.upAnim = game.animations.get("mouseUp");
+	this.downAnim = game.animations.get("mouseDown");
 
 	//create entities
 	this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
@@ -152,6 +166,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	this.playerSpeed = 2;
 	this.timers.p1Throw = throwTimer(this.player1,p1Img);
 	this.timers.p2Throw = throwTimer(this.player2,p2Img);
+
 }, function(elapsedMillis) {
 	// simulation
 	chucking(this.player1, elapsedMillis);
@@ -159,11 +174,16 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	///////player 1 controls
 	if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
 		this.player1.y -= this.playerSpeed;
+		this.player1.sprite = this.upAnim;
 	}
-	if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound){
+	else if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound){
 		this.player1.y += this.playerSpeed;
+		this.player1.sprite = this.downAnim;
 	}
-	if (game.keyboard.consumePressed("d")){
+	else{
+		this.player1.sprite = game.animations.get("player1");
+	}
+	if (game.keyboard.consumePressed("d") && !game.keyboard.isPressed("w") && !game.keyboard.isPressed("s")){
 		console.log("fire1");
 		this.timers.p1Throw.start();
 		this.player1.sprite = game.animations.get("mouseThrow");
@@ -180,11 +200,16 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	//////player 2 controls
 	if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
 		this.player2.y -= this.playerSpeed;
+		this.player2.sprite = this.upAnim;
 	}
-	if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound){
+	else if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound){
 		this.player2.y += this.playerSpeed;
+		this.player2.sprite = this.downAnim;
 	}
-	if (game.keyboard.consumePressed("left")){
+	else{
+		this.player2.sprite = game.animations.get("player2");
+	}
+	if (game.keyboard.consumePressed("left")&& !game.keyboard.isPressed("up") && !game.keyboard.isPressed("down")){
 		console.log("fire2");
 
 		this.player2.sprite = game.animations.get("mouseThrow2");
