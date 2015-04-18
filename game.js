@@ -11,6 +11,11 @@ var manifest = {
 	"fonts": {
 	},
 	"animations": {
+		"background": {
+            "strip": "animations/board.png",
+            "frames": 1,
+            "msPerFrame": 100
+        }
 	}
 };
 
@@ -46,7 +51,8 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
 	// initialization
-
+	var bgImage = game.animations.get("background");
+	this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
 	this.upperbound = 100;
 	this.lowerbound = canvas.height - 100;
 	this.player1 = {
@@ -126,9 +132,9 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 }, function(context) {
 	// draw
 	context.fillStyle = "#092fff";
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	this.bg.draw(context);
 
-	context.fillStyle = "#fff";
+	context.fillStyle = "#ff0000";
 	context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
 	context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
 	//context.font = "25px helvetica";
