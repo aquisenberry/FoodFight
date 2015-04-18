@@ -79,12 +79,15 @@ function throwTimer(player,sprite){
 }
 
 function hitting(player) {
-    var projectile = player.nemesis.projectiles.slice(-1);
-    var hits = player.collides(projectile);
-    if (hits) {
-        console.log("OUCH!!!!");
-        player.nemsis.projectiles = [];
+    var projectiles = player.nemesis.projectiles;
+    for(var i = 0;i<projectiles.length;i++){
+    	var hits = player.collides(projectiles[i]);
+	    if (hits) {
+	        console.log("OUCH!!!!");
+	        player.nemesis.projectiles.splice(i,1);
+	    }
     }
+    
 }
 
 game.scenes.add("title", new Splat.Scene(canvas, function() {
