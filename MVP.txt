@@ -1,8 +1,0 @@
-MVP
-
-Spawn for food
-health
-player specific control
-collision
-effects*
-throw vectors
