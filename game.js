@@ -53,13 +53,33 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		x:100,
 		y:this.canvas.height/2 -10,
 		width:20,
-		height:20
+		height:20,
+		arsenal:[{
+			weapon:"weapon1"
+		},
+		{
+			weapon:"weapon2"
+		},
+		{
+			weapon:"weapon3"
+		}],
+		selectedWeapon:0
 	};
 	this.player2 = {
 		x:canvas.width - 120,
 		y:this.canvas.height/2 -10,
 		width:20,
-		height:20
+		height:20,
+		arsenal:[{
+			weapon:"weapon1"
+		},
+		{
+			weapon:"weapon2"
+		},
+		{
+			weapon:"weapon3"
+		}],
+		selectedWeapon:0
 	};
 	this.playerSpeed = 2;
 }, function() {
@@ -69,25 +89,40 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
 		this.player1.y -= this.playerSpeed;
 	}
-	if (game.keyboard.isPressed("s") && this.player1.y < this.lowerbound){
+	if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound){
 		this.player1.y += this.playerSpeed;
 	}
 	if (game.keyboard.consumePressed("d")){
 		console.log("fire1");
 		//TODO:fire projectile
 	}
+	if (game.keyboard.consumePressed("a")){
+		console.log("switch");
+		this.player1.selectedWeapon +=1;
+		if(this.player1.selectedWeapon > 2){
+			this.player1.selectedWeapon = 0;
+		}
+		console.log(this.player1.arsenal[this.player1.selectedWeapon].weapon);
+	}
 	//////player 2 controls
 	if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
 		this.player2.y -= this.playerSpeed;
 	}
-	if (game.keyboard.isPressed("down") && this.player2.y < this.lowerbound){
+	if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound){
 		this.player2.y += this.playerSpeed;
 	}
 	if (game.keyboard.consumePressed("left")){
 		console.log("fire2");
 		//TODO:fire projectile
 	}
-
+	if (game.keyboard.consumePressed("right")){
+		console.log("switch");
+		this.player2.selectedWeapon +=1;
+		if(this.player2.selectedWeapon > 2){
+			this.player2.selectedWeapon = 0;
+		}
+		console.log(this.player2.arsenal[this.player2.selectedWeapon].weapon);
+	}
 }, function(context) {
 	// draw
 	context.fillStyle = "#092fff";
