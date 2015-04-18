@@ -50,7 +50,7 @@ function centerText(context, text, offsetX, offsetY) {
 }
 
 function chuck(player, vx) {
-    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get("holder"), 10, 10);
+    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get("player1"), 10, 10);
     projectile.vx = vx;
     projectile.vy = 0;
     player.projectiles.push(projectile);
@@ -98,7 +98,6 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 }));
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
-<<<<<<< HEAD
 	// initialization
 	//declare images
 	var bgImage = game.animations.get("background");
@@ -122,11 +121,10 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		}
 	];
 	this.player1.selectedWeapon = 0;
-	selectedWeapon:0,
-        chuck:function () {
-            chuck(this, 1);
-        },
-        projectiles:[]
+	this.player1.chuck = function(){
+		chuck(this,1);
+	};
+	this.player1.projectiles = [];
 
 	//player2	
 	this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width,p2Img.height,p2Img,0,0);
@@ -142,11 +140,11 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		}
 	];
 	this.player2.selectedWeapon = 0;
-	selectedWeapon:0,
-        chuck:function () {
-            chuck(this, 1);
-        },
-        projectiles:[]
+	this.player2.chuck = function(){
+		chuck(this,-1);
+	};
+	this.player2.projectiles = [];
+	
 
 	//define scene variables
 	this.upperbound = 70;
