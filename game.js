@@ -18,22 +18,22 @@ var manifest = {
             "msPerFrame": 100
         },
         "player1":{
-        	"strip": "animations/mouseSmallSide1.png",
+            "strip": "animations/mouseSmallSide1.png",
             "frames": 1,
             "msPerFrame": 100
         },
         "player2":{
-        	"strip": "animations/mouseSmallSide1P2.png",
+            "strip": "animations/mouseSmallSide1P2.png",
             "frames": 1,
             "msPerFrame": 100
         },
         "mouseThrow":{
-        	"strip": "animations/mouseThrow.png",
+            "strip": "animations/mouseThrow.png",
             "frames": 3,
             "msPerFrame": 100
         },
         "mouseThrow2":{
-        	"strip": "animations/mouseThrowP2.png",
+            "strip": "animations/mouseThrowP2.png",
             "frames": 3,
             "msPerFrame": 100
         },
@@ -85,14 +85,30 @@ function chucking(player, elapsedMillis) {
         projectile.move(elapsedMillis);
     });
 }
+
 function throwTimer(player,sprite){
-	console.log("here");
-	return new Splat.Timer(function(){}, 300,function(){
-		this.stop();
-		this.reset();
-		player.sprite = sprite;
-	});
+
+    console.log("here");
+    return new Splat.Timer(function(){}, 300,function(){
+	console.log(this);
+	this.stop();
+	this.reset();
+	player.sprite = sprite;
+    });
 }
+
+function hitting(player) {
+    var projectiles = player.nemesis.projectiles;
+    for(var i = 0;i<projectiles.length;i++){
+    	var hits = player.collides(projectiles[i]);
+	    if (hits) {
+	        console.log("OUCH!!!!");
+	        player.nemesis.projectiles.splice(i,1);
+	    }
+    }
+    
+}
+
 game.scenes.add("title", new Splat.Scene(canvas, function() {
     // initialization
 
@@ -216,58 +232,109 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	}
 	if (game.keyboard.consumePressed("left")&& !game.keyboard.isPressed("up") && !game.keyboard.isPressed("down")){
 
-		this.player2.sprite = game.animations.get("mouseThrow2");
-		this.timers.p2Throw.start();
-		this.player2.chuck();
-		//TODO:fire projectile
-	}
-	if (game.keyboard.consumePressed("right")){
-		this.player2.selectedWeapon +=1;
-		if(this.player2.selectedWeapon > 2){
-			this.player2.selectedWeapon = 0;
-		}
-	}
-	this.player1.move(elapsedMillis);
-	this.player2.move(elapsedMillis);
-}, function(context) {
-	// draw
-	context.fillStyle = "#092fff";
-	this.bg.draw(context);
 
-	context.fillStyle = "#ff0000";
-	//context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
-	//context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
+    //define scene variables
+    this.upperbound = 70;
+    this.lowerbound = canvas.height - 70;
+    this.playerSpeed = 2;
+    this.timers.p1Throw = throwTimer(this.player1,p1Img);
+    this.timers.p2Throw = throwTimer(this.player2,p2Img);
+    this.player1.nemesis = this.player2;
+    this.player2.nemesis = this.player1;
+    this.playerSpeed = 2;
+
+}, function(elapsedMillis) {
+    // simulation
+    chucking(this.player1, elapsedMillis);
+    chucking(this.player2, elapsedMillis);
+    hitting(this.player1);
+    hitting(this.player2);
+    
+    ///////player 1 controls
+    if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
+	this.player1.y -= this.playerSpeed;
+    }
+    if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound){
+	this.player1.y += this.playerSpeed;
+    }
+    if (game.keyboard.consumePressed("d")){
+	console.log("fire1");
+	this.timers.p1Throw.start();
+	this.player1.sprite = game.animations.get("mouseThrow");
+	this.player1.chuck();
 	
-	this.player1.draw(context);
-	this.player2.draw(context);	
-	switch(this.player1.selectedWeapon){
-		case 0:
-			context.fillStyle = "#ff0000";
-			break;
-		case 1:
-			context.fillStyle = "#00ff00";
-			break;
-		case 2:
-			context.fillStyle = "#0000ff";
-			break;
+	//TODO:fire projectile
+    }
+    if (game.keyboard.consumePressed("a")){
+	this.player1.selectedWeapon +=1;
+	if(this.player1.selectedWeapon > 2){
+	    this.player1.selectedWeapon = 0;
 	}
-	context.fillRect(50,canvas.height- 50,20,20);
-	switch(this.player2.selectedWeapon){
-		case 0:
-			context.fillStyle = "#ff0000";
-			break;
-		case 1:
-			context.fillStyle = "#00ff00";
-			break;
-		case 2:
-			context.fillStyle = "#0000ff";
-			break;
+    }
+    //////player 2 controls
+    if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
+	this.player2.y -= this.playerSpeed;
+    }
+    if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound){
+	this.player2.y += this.playerSpeed;
+    }
+    if (game.keyboard.consumePressed("left")){
+	console.log("fire2");
+
+	this.player2.sprite = game.animations.get("mouseThrow2");
+	this.timers.p2Throw.start();
+	this.player2.chuck();
+	//TODO:fire projectile
+
+        
+    }
+    if (game.keyboard.consumePressed("right")){
+	this.player2.selectedWeapon +=1;
+	if(this.player2.selectedWeapon > 2){
+	    this.player2.selectedWeapon = 0;
 	}
-	context.fillRect(canvas.width -70,canvas.height-50,20,20);
-	chucker(this.player1, context);
+    }
+    this.player1.move(elapsedMillis);
+    this.player2.move(elapsedMillis);
+}, function(context) {
+    // draw
+    context.fillStyle = "#092fff";
+    this.bg.draw(context);
+
+    context.fillStyle = "#ff0000";
+    //context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
+    //context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
+    
+    this.player1.draw(context);
+    this.player2.draw(context);	
+    switch(this.player1.selectedWeapon){
+    case 0:
+	context.fillStyle = "#ff0000";
+	break;
+    case 1:
+	context.fillStyle = "#00ff00";
+	break;
+    case 2:
+	context.fillStyle = "#0000ff";
+	break;
+    }
+    context.fillRect(50,canvas.height- 50,20,20);
+    switch(this.player2.selectedWeapon){
+    case 0:
+	context.fillStyle = "#ff0000";
+	break;
+    case 1:
+	context.fillStyle = "#00ff00";
+	break;
+    case 2:
+	context.fillStyle = "#0000ff";
+	break;
+    }
+    context.fillRect(canvas.width -70,canvas.height-50,20,20);
+    chucker(this.player1, context);
     chucker(this.player2, context);
-	//context.font = "25px helvetica";
-	//centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
+    //context.font = "25px helvetica";
+    //centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
 
 }));
 
