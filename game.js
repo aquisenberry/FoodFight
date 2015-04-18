@@ -15,6 +15,11 @@ var manifest = {
             "strip": "animations/board.png",
             "frames": 1,
             "msPerFrame": 100
+        },
+        "holder":{
+        	"strip": "animations/mouseSmallSide1.png",
+            "frames": 1,
+            "msPerFrame": 100
         }
 	}
 };
@@ -51,15 +56,27 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
 	// initialization
+
+	//declare images
 	var bgImage = game.animations.get("background");
+	var holderImage = game.animations.get("holder");
+	var holderImage2 =game.animations.get("holder").copy();
+	holderImage2.flipHorizontally();
+
+	//create entities
 	this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
-	this.upperbound = 100;
-	this.lowerbound = canvas.height - 100;
+
+	//define scene variables
+	this.upperbound = 70;
+	this.lowerbound = canvas.height - 70;
 	this.player1 = {
-		x:100,
+		x:0,
 		y:this.canvas.height/2 -10,
-		width:20,
-		height:20,
+		width:holderImage.width,
+		height:holderImage.height,
+		get sprite(){
+		 return new Splat.AnimatedEntity(this.x,this.y,this.width,this.height,holderImage,0,0);
+		}, 
 		arsenal:[{
 			weapon:"weapon1"
 		},
@@ -72,11 +89,13 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		selectedWeapon:0
 	};
 	this.player2 = {
-		x:canvas.width - 120,
-		y:this.canvas.height/2 -10,
-		width:20,
-		height:20,
-		arsenal:[{
+		x:canvas.width - holderImage2.width,
+		y:this.canvas.height/2 -holderImage2.height/2,
+		width:holderImage2.width,
+		height:holderImage2.height,
+		get sprite(){
+		 return new Splat.AnimatedEntity(this.x,this.y,this.width,this.height,holderImage2,0,0);
+		},arsenal:[{
 			weapon:"weapon1"
 		},
 		{
@@ -135,8 +154,10 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	this.bg.draw(context);
 
 	context.fillStyle = "#ff0000";
-	context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
-	context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
+	//context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
+	//context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
+	this.player1.sprite.draw(context);
+	this.player2.sprite.draw(context);
 	//context.font = "25px helvetica";
 	//centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
 }));
