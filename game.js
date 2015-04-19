@@ -117,6 +117,7 @@ function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
     var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get(player.arsenal[player.selectedWeapon].weapon), 10, 10);
     projectile.vx = player.arsenal[player.selectedWeapon].velocity;
     projectile.vy = 0;
+    projectile.impact = player.arsenal[player.selectedWeapon].impact;
     player.projectiles.push(projectile);
 }
 
@@ -137,13 +138,14 @@ function chucking(player, elapsedMillis) {
 function collision(player, projectile) {
     hitAnimation(player);
     player.health -= projectile.impact;
+    console.log(player.sprite + "     :     " + player.health);
     if (player.health <= 0) {
         endGame(player);
     }
 }
 
 function endGame(player) {
-    console.log(player.nemisis.sprite + " WINNSSSSSSS!!!!");
+    console.log(player.nemesis.sprite + " WINNSSSSSSS!!!!");
 }
 
 function hitting(player) {
@@ -151,7 +153,7 @@ function hitting(player) {
     for(var i = 0; i< projectiles.length;i++){
     	if(player.collides(projectiles[i])){
     	    console.log("OUCH!!!!");
-            collision(player, projectile);
+            collision(player, projectiles[i]);
     	    player.nemesis.projectiles.splice(i,1);
     	}
     }
@@ -246,7 +248,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	chuck(this);
     };
     this.player1.projectiles = [];
-
+    this.player1.health = 100;
+    
     //player2	
     this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width/2,p2Img.height,p2Img,0,0);
     this.player2.arsenal = [
@@ -274,6 +277,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	chuck(this);
     };
     this.player2.projectiles = [];
+    this.player2.health = 100;
     
     this.player1.nemesis = this.player2;
     this.player2.nemesis = this.player1;
