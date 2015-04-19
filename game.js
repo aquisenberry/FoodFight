@@ -8,12 +8,26 @@ var manifest = {
     "images": {
     },
     "sounds": {
+    	"title-music" : "sounds/Hungarian_Dance.wav",
+    	"game-music" : "sounds/LEncore.wav",
+    	"player-hurt": "sounds/player-hurt.wav",
+    	"player-throw": "sounds/player-throw.wav"
     },
     "fonts": {
     },
     "animations": {
-	"background": {
+		"background": {
             "strip": "animations/board.png",
+            "frames": 1,
+            "msPerFrame": 100
+        },
+        "title":{
+            "strip": "animations/title.png",
+            "frames": 1,
+            "msPerFrame": 100
+        },
+        "newGame":{
+            "strip": "animations/btnNewGame.png",
             "frames": 1,
             "msPerFrame": 100
         },
@@ -23,9 +37,10 @@ var manifest = {
             "msPerFrame": 100
         },
         "player2":{
-            "strip": "animations/mouseSmallSide1P2.png",
+            "strip": "animations/mouseSmallSide1.png",
             "frames": 1,
-            "msPerFrame": 100
+            "msPerFrame": 100,
+            "flip":"horizontal"
         },
         "mouseThrow":{
             "strip": "animations/mouseThrow.png",
@@ -33,9 +48,10 @@ var manifest = {
             "msPerFrame": 100
         },
         "mouseThrow2":{
-            "strip": "animations/mouseThrowP2.png",
+            "strip": "animations/mouseThrow.png",
             "frames": 3,
-            "msPerFrame": 100
+            "msPerFrame": 100,
+            "flip": "horizontal"
         },
         "mouseUp":{
             "strip": "animations/mouseUp.png",
@@ -105,12 +121,12 @@ var manifest = {
 
 var game = new Splat.Game(canvas, manifest);
 
-function centerText(context, text, offsetX, offsetY) {
-    var w = context.measureText(text).width;
-    var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
-    var y = offsetY | 0;
-    context.fillText(text, x, y);
-}
+// function centerText(context, text, offsetX, offsetY) {
+//     var w = context.measureText(text).width;
+//     var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
+//     var y = offsetY | 0;
+//     context.fillText(text, x, y);
+// }
 
 // Starts a throw by creating AnimatedEntity and giving it velocity.
 function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
@@ -153,6 +169,7 @@ function hitting(player) {
     for(var i = 0; i< projectiles.length;i++){
     	if(player.collides(projectiles[i])){
     	    console.log("OUCH!!!!");
+    	    game.sounds.play("player-hurt");
             collision(player, projectiles[i]);
     	    player.nemesis.projectiles.splice(i,1);
     	}
@@ -178,27 +195,37 @@ function throwTimer(player,sprite){
 }
 game.scenes.add("title", new Splat.Scene(canvas, function() {
     // initialization
+    game.sounds.stop("game-music");
+    game.sounds.play("title-music",true);
+    var btn = game.animations.get("newGame");
+    this.buttons = [];
 
-}, function() {
-    // simulation
-    if(game.mouse.consumePressed(0)){
-	game.scenes.switchTo("main");
-    }
-    // this.buttons.push( new Splat.Button(game.mouse,canvas.width/2 - playBtnImage.width/2,220 + canvas.height/2 - playBtnImage.height/2, { normal: playBtnImage, pressed: playBtnImage }, function(state) {
-    // 	if (state === "pressed"){
-    // 	}
-    // }));
+	this.buttons.push( new Splat.Button(game.mouse,canvas.width/2 - btn.width/2,150 + canvas.height/2 - btn.height/2, { normal: btn, pressed: btn }, function(state) {
+		if (state === "pressed"){
+			game.sounds.stop("title-music");
+			game.scenes.switchTo("main");
+		}
+	}, function() {
+	}));
+}, function(elapsedMillis) {
+    //simulation
+    this.buttons.forEach(function(button) {
+		button.move(elapsedMillis);
+	});
 }, function(context) {
     // draw
-    context.fillStyle = "#092227";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#fff";
-    context.font = "25px helvetica";
-    centerText(context, "Hello Splat", 0, canvas.height / 2 - 13);
+    game.animations.get("title").draw(context,0,0);
+    this.buttons.forEach(function(button){
+		button.draw(context);
+	});
 }));
 
 game.scenes.add("main", new Splat.Scene(canvas, function() {
     // initialization
+    //play music
+    game.sounds.stop("title-music");
+    game.sounds.play("game-music",true);
+    
     //declare images
     var bgImage = game.animations.get("background");
     //var mouseThrow = game.animations.get("mouseThrow");
@@ -222,7 +249,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.spaghettiIndicator1 = new Splat.AnimatedEntity(50, canvas.height- (spaghettiImageR.height+30), spaghettiImageR.width, spaghettiImageR.height, spaghettiImageR,0,0);
     this.spaghettiIndicator2 = new Splat.AnimatedEntity(canvas.width -(spaghettiImageL.width+30),canvas.height-(spaghettiImageL.height+30),spaghettiImageL.width,spaghettiImageL.height,spaghettiImageL,0,0);
     //player1
-    this.player1 = new Splat.AnimatedEntity(0,this.canvas.height/2 -p1Img.height/2,p1Img.width/2,p1Img.height,p1Img,0,0);
+    this.player1 = new Splat.AnimatedEntity(50 + p1Img.width/2,this.canvas.height/2 -p1Img.height/2,p1Img.width/2,p1Img.height/2,p1Img,-p1Img.width/4,-p1Img.height/4);
     this.player1.arsenal = [
 	{
 	    weapon:"hotdog",
@@ -245,13 +272,14 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     ];
     this.player1.selectedWeapon = 0;
     this.player1.chuck = function(){
+    	game.sounds.play("player-throw");
 	chuck(this);
     };
     this.player1.projectiles = [];
     this.player1.health = 100;
     
     //player2	
-    this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width/2,p2Img.height,p2Img,0,0);
+    this.player2 = new Splat.AnimatedEntity(canvas.width - (p2Img.width/2 +50),this.canvas.height/2 -p2Img.height/2,p2Img.width/2,p2Img.height/2,p2Img,-p1Img.width/4,-p1Img.height/4);
     this.player2.arsenal = [
 	{
 	    weapon:"hotdog",
@@ -274,7 +302,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     ];
     this.player2.selectedWeapon = 0;
     this.player2.chuck = function(){
-	chuck(this);
+    	game.sounds.play("player-throw");
+		chuck(this);
     };
     this.player2.projectiles = [];
     this.player2.health = 100;
@@ -290,6 +319,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.timers.p2Throw = throwTimer(this.player2,p2Img);
 
 }, function(elapsedMillis) {
+	game.sounds.stop("title-music");
     // simulation
     chucking(this.player1, elapsedMillis);
     chucking(this.player2, elapsedMillis);
