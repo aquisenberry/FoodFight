@@ -168,6 +168,7 @@ function collision(player, projectile) {
 
 function endGame(player) {
     console.log(player.nemesis.sprite + " WINNSSSSSSS!!!!");
+    game.scenes.switchTo("credits");
 }
 
 function hitting(player) {
@@ -432,6 +433,29 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     //centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
 
 }));
+game.scenes.add("credits", new Splat.Scene(canvas, function() {
+    // initialization
+    game.sounds.stop("game-music");
+    game.sounds.play("title-music",true);
+    
+}, function() {
+    //simulation
+    
+}, function(context) {
+    // draw
+    context.fillStyle = "#000000";
+    context.fillRect(0,0,canvas.width,canvas.height);
 
+    context.fillStyle = "#0000ff";
+    context.font = "25px helvetica bold";
+    centerText(context, "Programming by:", 0, 50 );
+    context.font = "25px helvetica";
+    centerText(context, "Anthony Quisenberry:", 0, 100);
+    centerText(context, "Clay Morton", 0, 130);
+    context.font = "25px helvetica bold";
+    centerText(context, "Art by:", 0, 200);
+    context.font = "25px helvetica ";
+    centerText(context, "Kira Winters", 0, 250);
+}));
 
 game.scenes.switchTo("loading");
