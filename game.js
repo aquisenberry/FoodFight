@@ -22,10 +22,20 @@ var manifest = {
             "frames": 1,
             "msPerFrame": 100
         },
+        "player1Impact":{
+            "strip": "animations/player1Impact.png",
+            "frames": 1,
+            "msPerFrame": 200
+        },
         "player2":{
             "strip": "animations/mouseSmallSide1P2.png",
             "frames": 1,
             "msPerFrame": 100
+        },
+        "player2Impact":{
+            "strip": "animations/player2Impact.png",
+            "frames": 1,
+            "msPerFrame": 200
         },
         "mouseThrow":{
             "strip": "animations/mouseThrow.png",
@@ -42,10 +52,21 @@ var manifest = {
             "frames": 2,
             "msPerFrame": 70
         },
+        "mouseUpImpact":{
+            "strip": "animations/mouseUpImpact.png",
+            "frames": 2,
+            "msPerFrame": 200
+        },
         "mouseDown":{
             "strip": "animations/mouseUp.png",
             "frames": 2,
             "msPerFrame": 70,
+            "flip":"vertical"
+        },
+        "mouseDownImpact":{
+            "strip": "animations/mouseUpImpact.png",
+            "frames": 2,
+            "msPerFrame": 200,
             "flip":"vertical"
         },
         "hotdog":{
@@ -75,24 +96,24 @@ var manifest = {
             "msPerFrame": 100,
             "flip": "horizontal"
         },
-        "impactTomato-1":{
+        "tomato-1Impact":{
             "strip": "animations/spaghetti.png",
             "frames": 4,
             "msPerFrame": 50
         },
-        "impactTomato-2":{
+        "tomato-2Impact":{
             "strip": "animations/spaghetti.png",
             "frames": 4,
             "msPerFrame": 50,
             "flip": "horizontal"
         },
-        "impactSpaghetti-1":{
+        "spaghetti-1Impact":{
             "strip": "animations/spaghetti.png",
             "frames": 3,
             "msPerFrame": 50,
             "flip": "horizontal"
         },
-        "impactSpaghetti-2":{
+        "spaghetti-2Impact":{
             "strip": "animations/spaghetti.png",
             "frames": 3,
             "msPerFrame": 50,
@@ -136,9 +157,11 @@ function chucking(player, elapsedMillis) {
 }
 
 function collision(player, projectile) {
-    hitAnimation(player);
+//    var timer = hitAnimation(player, player.sprite);
+//    timer.start();
+    console.log(hitAnimation(player, player.sprite));
+    player.sprite = game.animations.get(player.sprite.name + "Impact");
     player.health -= projectile.impact;
-    console.log(player.sprite + "     :     " + player.health);
     if (player.health <= 0) {
         endGame(player);
     }
@@ -159,16 +182,16 @@ function hitting(player) {
     }
 }
 
-function hitAnimation(player) {
-    return new Splat.Timer(function () {}, 200, function() {
-        var sprite = player.arsenal[player.selectedWeapon].weapon + "impact"; 
+function hitAnimation(entity, sprite) {
+    return new Splat.Timer(function () {}, 1800, function() {
         this.stop();
         this.reset();
-        player.sprite = sprite;
+        console.log("Dirty Fish Are HERE");
+        entity.sprite = sprite;
     });
 }
 
-function throwTimer(player,sprite){
+function throwTimer(player, sprite){
     console.log("here");
     return new Splat.Timer(function(){}, 300,function(){
 	this.stop();
@@ -204,6 +227,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     //var mouseThrow = game.animations.get("mouseThrow");
     var p1Img = game.animations.get("player1");
     var p2Img = game.animations.get("player2");
+    this.player1Impact = game.animations.get("player1Impact");
+    this.player2Impact = game.animations.get("player2Impact");
     this.upAnim = game.animations.get("mouseUp");
     this.downAnim = game.animations.get("mouseDown");
     var hotdogImg = game.animations.get("hotdog");
@@ -314,9 +339,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	this.timers.p1Throw.start();
 	this.player1.sprite = game.animations.get("mouseThrow");
 	this.player1.chuck();
-	
-	//TODO:fire projectile
     }
+
     if (game.keyboard.consumePressed("a")){
 	this.player1.selectedWeapon +=1;
 	if(this.player1.selectedWeapon > 2){
@@ -360,7 +384,6 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     context.fillStyle = "#ff0000";
     //context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
     //context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
-    
     this.player1.draw(context);
     this.player2.draw(context);	
 
