@@ -91,14 +91,20 @@ function chucking(player, elapsedMillis) {
 
 // Collision detection.
 function hitting(player) {
-    var projectile = player.nemesis.projectiles.slice(-1)[0];
-    if (projectile) {
-        var hits = player.collides(projectile);
-        if (hits) {
-            console.log("OUCH!!!!"); // TODO: create 'collision' function.
-            player.nemesis.projectiles = []; // Clears out the players moving projectiles.
-        }
+    var projectiles = player.nemesis.projectiles;
+    for(var i = 0; i< projectiles.length;i++){
+    	if(player.collides(projectiles[i])){
+    		console.log("OUCH!!!!");
+    		player.nemesis.projectiles.splice(i,1);
+    	}
     }
+    // if (projectile) {
+    //     var hits = player.collides(projectile);
+    //     if (hits) {
+    //         console.log("OUCH!!!!"); // TODO: create 'collision' function.
+    //         player.nemesis.projectiles = []; // Clears out the players moving projectiles.
+    //     }
+    // }
 }
 
 function throwTimer(player,sprite){
