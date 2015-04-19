@@ -121,16 +121,22 @@ var manifest = {
 
 var game = new Splat.Game(canvas, manifest);
 
-// function centerText(context, text, offsetX, offsetY) {
-//     var w = context.measureText(text).width;
-//     var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
-//     var y = offsetY | 0;
-//     context.fillText(text, x, y);
-// }
+function centerText(context, text, offsetX, offsetY) {
+    var w = context.measureText(text).width;
+    var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
+    var y = offsetY | 0;
+    context.fillText(text, x, y);
+}
 
 // Starts a throw by creating AnimatedEntity and giving it velocity.
 function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
-    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get(player.arsenal[player.selectedWeapon].weapon), 10, 10);
+    var projectile = new Splat.AnimatedEntity(
+    	player.x , 
+    	player.y + player.height/2, 
+    	game.animations.get(player.arsenal[player.selectedWeapon].weapon).width, 
+    	game.animations.get(player.arsenal[player.selectedWeapon].weapon).height, 
+    	game.animations.get(player.arsenal[player.selectedWeapon].weapon), 0, 0
+    	);
     projectile.vx = player.arsenal[player.selectedWeapon].velocity;
     projectile.vy = 0;
     projectile.impact = player.arsenal[player.selectedWeapon].impact;
@@ -202,6 +208,7 @@ game.scenes.add("title", new Splat.Scene(canvas, function() {
 
 	this.buttons.push( new Splat.Button(game.mouse,canvas.width/2 - btn.width/2,150 + canvas.height/2 - btn.height/2, { normal: btn, pressed: btn }, function(state) {
 		if (state === "pressed"){
+			game.playerHealth = prompt("Please Enter Starting Health ", "100");
 			game.sounds.stop("title-music");
 			game.scenes.switchTo("main");
 		}
@@ -276,7 +283,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	chuck(this);
     };
     this.player1.projectiles = [];
-    this.player1.health = 100;
+    this.player1.health = Number(game.playerHealth);
     
     //player2	
     this.player2 = new Splat.AnimatedEntity(canvas.width - (p2Img.width/2 +50),this.canvas.height/2 -p2Img.height/2,p2Img.width/2,p2Img.height/2,p2Img,-p1Img.width/4,-p1Img.height/4);
@@ -306,7 +313,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		chuck(this);
     };
     this.player2.projectiles = [];
-    this.player2.health = 100;
+    this.player2.health = Number(game.playerHealth);
     
     this.player1.nemesis = this.player2;
     this.player2.nemesis = this.player1;
@@ -387,7 +394,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     context.fillStyle = "#092fff";
     this.bg.draw(context);
 
-    context.fillStyle = "#ff0000";
+    context.fillStyle = "#0000ff";
     //context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
     //context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
     
@@ -418,6 +425,9 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     }
     chucker(this.player1, context);
     chucker(this.player2, context);
+    context.font="30px Verdana";
+    centerText(context,this.player1.health,-500,50);
+    centerText(context,this.player2.health,500,50);
     //context.font = "25px helvetica";
     //centerText(context, "Blank SplatJS Project", 0, canvas.height / 2 - 13);
 
