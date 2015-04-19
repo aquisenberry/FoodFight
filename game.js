@@ -53,26 +53,49 @@ var manifest = {
             "frames": 1,
             "msPerFrame": 100
         },
-        "tomato-r":{
+        "tomato-1":{
             "strip": "animations/tomato.png",
             "frames": 1,
             "msPerFrame": 100
         },
-        "tomato-l":{
+        "tomato-2":{
             "strip": "animations/tomato.png",
             "frames": 1,
             "msPerFrame": 100,
             "flip": "horizontal"
         },
-        "spaghetti-r":{
+        "spaghetti-1":{
             "strip": "animations/spaghetti.png",
             "frames": 1,
             "msPerFrame": 100
         },
-        "spaghetti-l":{
+        "spaghetti-2":{
             "strip": "animations/spaghetti.png",
             "frames": 1,
             "msPerFrame": 100,
+            "flip": "horizontal"
+        },
+        "impactTomato-1":{
+            "strip": "animations/spaghetti.png",
+            "frames": 4,
+            "msPerFrame": 50
+        },
+        "impactTomato-2":{
+            "strip": "animations/spaghetti.png",
+            "frames": 4,
+            "msPerFrame": 50,
+            "flip": "horizontal"
+        },
+        "impactSpaghetti-1":{
+            "strip": "animations/spaghetti.png",
+            "frames": 3,
+            "msPerFrame": 50,
+            "flip": "horizontal"
+        },
+        "impactSpaghetti-2":{
+            "strip": "animations/spaghetti.png",
+            "frames": 3,
+            "msPerFrame": 50,
             "flip": "horizontal"
         }
 
@@ -93,7 +116,7 @@ function centerText(context, text, offsetX, offsetY) {
 function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
 
     var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get(player.arsenal[player.selectedWeapon].weapon), 10, 10);
-    projectile.vx = player.arsenal[player.selectedWeapon].speed;
+    projectile.vx = player.arsenal[player.selectedWeapon].velocity;
     projectile.vy = 0;
     player.projectiles.push(projectile);
 }
@@ -169,10 +192,10 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.upAnim = game.animations.get("mouseUp");
     this.downAnim = game.animations.get("mouseDown");
     var hotdogImg = game.animations.get("hotdog");
-    var tomatoImageR = game.animations.get("tomato-r");
-    var tomatoImagel = game.animations.get("tomato-l");
-    var spaghettiImageR = game.animations.get("spaghetti-r");
-    var spaghettiImageL = game.animations.get("spaghetti-l");
+    var tomatoImageR = game.animations.get("tomato-1");
+    var tomatoImagel = game.animations.get("tomato-2");
+    var spaghettiImageR = game.animations.get("spaghetti-1");
+    var spaghettiImageL = game.animations.get("spaghetti-2");
 
     //create entities
     this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
@@ -188,15 +211,21 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.player1.arsenal = [
 	{
 	    weapon:"hotdog",
-	    speed:0.8
+	    spriteHit:"hotdog",
+	    impact:10,
+	    velocity:0.8
 	},
 	{
-	    weapon:"tomato-r",
-	    speed:0.5
+	    weapon:"tomato-1",
+	    spriteHit:"impactTomato-1Impact",
+	    impact:10,
+	    velocity:0.5
 	},
 	{
-	    weapon:"spaghetti-r",
-	    speed:1.4
+	    weapon:"spaghetti-1",
+	    spriteHit:"impactSpaghetti-1Impact",
+	    impact:10,
+	    velocity:1.4
 	}
     ];
     this.player1.selectedWeapon = 0;
@@ -210,15 +239,21 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.player2.arsenal = [
 	{
 	    weapon:"hotdog",
-	    speed:-0.8
+	    spriteHit:"hotdog",
+	    impact:10,
+	    velocity:-0.8
 	},
 	{
-	    weapon:"tomato-l",
-	    speed:-0.5
+	    weapon:"tomato-2",
+	    spriteHit:"impactTomato-2Impact",
+	    impact:10,
+	    velocity:-0.5
 	},
 	{
-	    weapon:"spaghetti-l",
-	    speed:-1.4
+	    weapon:"spaghetti-2",
+	    spriteHit:"spaghetti-2Impact",
+	    impact:10,
+	    velocity:-1.4
 	}
     ];
     this.player2.selectedWeapon = 0;
