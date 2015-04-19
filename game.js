@@ -50,7 +50,10 @@ function centerText(context, text, offsetX, offsetY) {
 }
 
 function chuck(player, vx) {
-    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get("player1"), 10, 10);
+    var x = JSON.parse(JSON.stringify(player.x)),
+        y = JSON.parse(JSON.stringify(player.y));
+
+    var projectile = new Splat.AnimatedEntity(x, y, 20, 20, game.animations.get("player1"), 10, 10);
     projectile.vx = vx;
     projectile.vy = 0;
     player.projectiles.push(projectile);
@@ -79,11 +82,13 @@ function throwTimer(player,sprite){
 }
 
 function hitting(player) {
-    var projectile = player.nemesis.projectiles.slice(-1);
-    var hits = player.collides(projectile);
-    if (hits) {
-        console.log("OUCH!!!!");
-        player.nemsis.projectiles = [];
+    var projectile = player.nemesis.projectiles.slice(-1)[0];
+    if (projectile) {
+        var hits = player.collides(projectile);
+        if (hits) {
+            console.log("OUCH!!!!");
+            player.nemesis.projectiles = [];
+        }
     }
 }
 
@@ -224,8 +229,8 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     // draw
     context.fillStyle = "#092fff";
     this.bg.draw(context);
-
-    context.fillStyle = "#ff0000";
+    
+        context.fillStyle = "#ff0000";
     //context.fillRect(this.player1.x, this.player1.y, this.player1.width, this.player1.height);
     //context.fillRect(this.player2.x, this.player2.y, this.player2.width, this.player2.height);
     
