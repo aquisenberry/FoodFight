@@ -52,7 +52,6 @@ var manifest = {
             "strip": "animations/hotDog.png",
             "frames": 1,
             "msPerFrame": 70,
-            "flip":"vertical"
         }
 
     }
@@ -145,10 +144,12 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     var p2Img = game.animations.get("player2");
     this.upAnim = game.animations.get("mouseUp");
     this.downAnim = game.animations.get("mouseDown");
-    this.hotdogImg = game.animations.get("hotdog");
+    var hotdogImg = game.animations.get("hotdog");
 
     //create entities
     this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
+    this.hotdogIndicator1 = new Splat.AnimatedEntity(50, canvas.height- 50, hotdogImg.width, hotdogImg.height, hotdogImg,0,0);
+    this.hotdogIndicator2 = new Splat.AnimatedEntity(canvas.width -70,canvas.height-50,hotdogImg.width,hotdogImg.height,hotdogImg,0,0);
     //player1
     this.player1 = new Splat.AnimatedEntity(0,this.canvas.height/2 -p1Img.height/2,p1Img.width/2,p1Img.height,p1Img,0,0);
     this.player1.arsenal = [
@@ -205,18 +206,20 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     hitting(this.player2);
     
     ///////player 1 controls
-    if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound){
+    if (game.keyboard.isPressed("w")  && this.player1.y > this.upperbound &&!this.timers.p1Throw.running){
 	this.player1.y -= this.playerSpeed;
 	this.player1.sprite = this.upAnim;
     }
-    else if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound){
+    else if (game.keyboard.isPressed("s") && this.player1.y+this.player1.height < this.lowerbound && !this.timers.p1Throw.running){
 	this.player1.y += this.playerSpeed;
 	this.player1.sprite = this.downAnim;
     }
     else{
-	this.player1.sprite = game.animations.get("player1");
+    	if(!this.timers.p1Throw.running){
+    		this.player1.sprite = game.animations.get("player1");
+    	}
     }
-    if (game.keyboard.consumePressed("d") && !game.keyboard.isPressed("w") && !game.keyboard.isPressed("s")){
+    if (game.keyboard.consumePressed("d") && !game.keyboard.isPressed("w") && !game.keyboard.isPressed("s") && !this.timers.p1Throw.running){
 	this.timers.p1Throw.start();
 	this.player1.sprite = game.animations.get("mouseThrow");
 	this.player1.chuck();
@@ -230,18 +233,20 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	}
     }
     //////player 2 controls
-    if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound){
+    if (game.keyboard.isPressed("up")  && this.player2.y > this.upperbound && !this.timers.p2Throw.running){
 	this.player2.y -= this.playerSpeed;
 	this.player2.sprite = this.upAnim;
     }
-    else if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound){
+    else if (game.keyboard.isPressed("down") && this.player2.y + this.player2.height < this.lowerbound && !this.timers.p2Throw.running){
 	this.player2.y += this.playerSpeed;
 	this.player2.sprite = this.downAnim;
     }
     else{
-	this.player2.sprite = game.animations.get("player2");
+    	if(!this.timers.p2Throw.running){
+			this.player2.sprite = game.animations.get("player2");
+    	}
     }
-    if (game.keyboard.consumePressed("left")&& !game.keyboard.isPressed("up") && !game.keyboard.isPressed("down")){
+    if (game.keyboard.consumePressed("left")&& !game.keyboard.isPressed("up") && !game.keyboard.isPressed("down") && !this.timers.p2Throw.running){
 
 	this.player2.sprite = game.animations.get("mouseThrow2");
 	this.timers.p2Throw.start();
@@ -267,30 +272,36 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     
     this.player1.draw(context);
     this.player2.draw(context);	
+
     switch(this.player1.selectedWeapon){
     case 0:
-	context.fillStyle = "#ff0000";
-	break;
+		this.hotdogIndicator1.draw(context);
+		break;
     case 1:
-	context.fillStyle = "#00ff00";
-	break;
+		context.fillStyle = "#00ff00";
+		break;
     case 2:
-	context.fillStyle = "#0000ff";
-	break;
+		context.fillStyle = "#0000ff";
+		break;
     }
-    context.fillRect(50,canvas.height- 50,20,20);
+    if(this.player1.selectedWeapon !== 0){
+    	context.fillRect(50,canvas.height- 50,20,20);
+	}
     switch(this.player2.selectedWeapon){
     case 0:
-	context.fillStyle = "#ff0000";
-	break;
+		this.hotdogIndicator2.draw(context);
+		break;
     case 1:
-	context.fillStyle = "#00ff00";
-	break;
+		context.fillStyle = "#00ff00";
+		break;
     case 2:
-	context.fillStyle = "#0000ff";
-	break;
+		context.fillStyle = "#0000ff";
+		break;
     }
+    if(this.player2.selectedWeapon !== 0){
     context.fillRect(canvas.width -70,canvas.height-50,20,20);
+
+    }
     chucker(this.player1, context);
     chucker(this.player2, context);
     //context.font = "25px helvetica";
