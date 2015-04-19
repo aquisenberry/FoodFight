@@ -51,8 +51,31 @@ var manifest = {
         "hotdog":{
             "strip": "animations/hotDog.png",
             "frames": 1,
-            "msPerFrame": 70,
+            "msPerFrame": 100
+        },
+        "tomato-r":{
+            "strip": "animations/tomato.png",
+            "frames": 1,
+            "msPerFrame": 100
+        },
+        "tomato-l":{
+            "strip": "animations/tomato.png",
+            "frames": 1,
+            "msPerFrame": 100,
+            "flip": "horizontal"
+        },
+        "spaghetti-r":{
+            "strip": "animations/spaghetti.png",
+            "frames": 1,
+            "msPerFrame": 100
+        },
+        "spaghetti-l":{
+            "strip": "animations/spaghetti.png",
+            "frames": 1,
+            "msPerFrame": 100,
+            "flip": "horizontal"
         }
+
 
     }
 };
@@ -67,9 +90,10 @@ function centerText(context, text, offsetX, offsetY) {
 }
 
 // Starts a throw by creating AnimatedEntity and giving it velocity.
-function chuck(player, vx) { // TODO: will need to receive a 'weapon' attribute.
-    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get("hotdog"), 10, 10);
-    projectile.vx = vx;
+function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
+
+    var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get(player.arsenal[player.selectedWeapon].weapon), 10, 10);
+    projectile.vx = player.arsenal[player.selectedWeapon].speed;
     projectile.vy = 0;
     player.projectiles.push(projectile);
 }
@@ -145,27 +169,39 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.upAnim = game.animations.get("mouseUp");
     this.downAnim = game.animations.get("mouseDown");
     var hotdogImg = game.animations.get("hotdog");
+    var tomatoImageR = game.animations.get("tomato-r");
+    var tomatoImagel = game.animations.get("tomato-l");
+    var spaghettiImageR = game.animations.get("spaghetti-r");
+    var spaghettiImageL = game.animations.get("spaghetti-l");
 
     //create entities
     this.bg = new Splat.AnimatedEntity(0,0,canvas.width,canvas.height,bgImage,0,0);
-    this.hotdogIndicator1 = new Splat.AnimatedEntity(50, canvas.height- 50, hotdogImg.width, hotdogImg.height, hotdogImg,0,0);
-    this.hotdogIndicator2 = new Splat.AnimatedEntity(canvas.width -70,canvas.height-50,hotdogImg.width,hotdogImg.height,hotdogImg,0,0);
+    //indicators
+    this.hotdogIndicator1 = new Splat.AnimatedEntity(50, canvas.height- (hotdogImg.height+30), hotdogImg.width, hotdogImg.height, hotdogImg,0,0);
+    this.hotdogIndicator2 = new Splat.AnimatedEntity(canvas.width -(hotdogImg.width+30),canvas.height-(hotdogImg.height+30),hotdogImg.width,hotdogImg.height,hotdogImg,0,0);
+    this.tomatoIndicator1 = new Splat.AnimatedEntity(50, canvas.height- (tomatoImageR.height+30), tomatoImageR.width, tomatoImageR.height, tomatoImageR,0,0);
+    this.tomatoIndicator2 = new Splat.AnimatedEntity(canvas.width -(tomatoImagel.width+30),canvas.height-(tomatoImagel.height+30),tomatoImagel.width,tomatoImagel.height,tomatoImagel,0,0);
+    this.spaghettiIndicator1 = new Splat.AnimatedEntity(50, canvas.height- (spaghettiImageR.height+30), spaghettiImageR.width, spaghettiImageR.height, spaghettiImageR,0,0);
+    this.spaghettiIndicator2 = new Splat.AnimatedEntity(canvas.width -(spaghettiImageL.width+30),canvas.height-(spaghettiImageL.height+30),spaghettiImageL.width,spaghettiImageL.height,spaghettiImageL,0,0);
     //player1
     this.player1 = new Splat.AnimatedEntity(0,this.canvas.height/2 -p1Img.height/2,p1Img.width/2,p1Img.height,p1Img,0,0);
     this.player1.arsenal = [
 	{
-	    weapon:"weapon1"
+	    weapon:"hotdog",
+	    speed:0.8
 	},
 	{
-	    weapon:"weapon2"
+	    weapon:"tomato-r",
+	    speed:0.5
 	},
 	{
-	    weapon:"weapon3"
+	    weapon:"spaghetti-r",
+	    speed:1.4
 	}
     ];
     this.player1.selectedWeapon = 0;
     this.player1.chuck = function(){
-	chuck(this,0.8);
+	chuck(this);
     };
     this.player1.projectiles = [];
 
@@ -173,18 +209,21 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     this.player2 = new Splat.AnimatedEntity(canvas.width - p2Img.width,this.canvas.height/2 -p2Img.height/2,p2Img.width/2,p2Img.height,p2Img,0,0);
     this.player2.arsenal = [
 	{
-	    weapon:"weapon1"
+	    weapon:"hotdog",
+	    speed:-0.8
 	},
 	{
-	    weapon:"weapon2"
+	    weapon:"tomato-l",
+	    speed:-0.5
 	},
 	{
-	    weapon:"weapon3"
+	    weapon:"spaghetti-l",
+	    speed:-1.4
 	}
     ];
     this.player2.selectedWeapon = 0;
     this.player2.chuck = function(){
-	chuck(this,-0.8);
+	chuck(this);
     };
     this.player2.projectiles = [];
     
@@ -278,29 +317,22 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 		this.hotdogIndicator1.draw(context);
 		break;
     case 1:
-		context.fillStyle = "#00ff00";
+		this.tomatoIndicator1.draw(context);
 		break;
     case 2:
-		context.fillStyle = "#0000ff";
+    	this.spaghettiIndicator1.draw(context);
 		break;
     }
-    if(this.player1.selectedWeapon !== 0){
-    	context.fillRect(50,canvas.height- 50,20,20);
-	}
     switch(this.player2.selectedWeapon){
     case 0:
 		this.hotdogIndicator2.draw(context);
 		break;
     case 1:
-		context.fillStyle = "#00ff00";
+		this.tomatoIndicator2.draw(context);
 		break;
     case 2:
-		context.fillStyle = "#0000ff";
+		this.spaghettiIndicator2.draw(context);
 		break;
-    }
-    if(this.player2.selectedWeapon !== 0){
-    context.fillRect(canvas.width -70,canvas.height-50,20,20);
-
     }
     chucker(this.player1, context);
     chucker(this.player2, context);
