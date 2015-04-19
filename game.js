@@ -440,6 +440,9 @@ game.scenes.add("credits", new Splat.Scene(canvas, function() {
     
 }, function() {
     //simulation
+    if(game.keyboard.isPressed("enter")){
+    	game.scenes.switchTo("title");
+    }
     
 }, function(context) {
     // draw
