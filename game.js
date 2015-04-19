@@ -114,7 +114,6 @@ function centerText(context, text, offsetX, offsetY) {
 
 // Starts a throw by creating AnimatedEntity and giving it velocity.
 function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
-
     var projectile = new Splat.AnimatedEntity(player.x, player.y, 20, 20, game.animations.get(player.arsenal[player.selectedWeapon].weapon), 10, 10);
     projectile.vx = player.arsenal[player.selectedWeapon].velocity;
     projectile.vy = 0;
@@ -135,22 +134,36 @@ function chucking(player, elapsedMillis) {
     });
 }
 
-// Collision detection.
+function collision(player, projectile) {
+    hitAnimation(player);
+    player.health -= projectile.impact;
+    if (player.health <= 0) {
+        endGame(player);
+    }
+}
+
+function endGame(player) {
+    console.log(player.nemisis.sprite + " WINNSSSSSSS!!!!");
+}
+
 function hitting(player) {
     var projectiles = player.nemesis.projectiles;
     for(var i = 0; i< projectiles.length;i++){
     	if(player.collides(projectiles[i])){
-    		console.log("OUCH!!!!");
-    		player.nemesis.projectiles.splice(i,1);
+    	    console.log("OUCH!!!!");
+            collision(player, projectile);
+    	    player.nemesis.projectiles.splice(i,1);
     	}
     }
-    // if (projectile) {
-    //     var hits = player.collides(projectile);
-    //     if (hits) {
-    //         console.log("OUCH!!!!"); // TODO: create 'collision' function.
-    //         player.nemesis.projectiles = []; // Clears out the players moving projectiles.
-    //     }
-    // }
+}
+
+function hitAnimation(player) {
+    return new Splat.Timer(function () {}, 200, function() {
+        var sprite = player.arsenal[player.selectedWeapon].weapon + "impact"; 
+        this.stop();
+        this.reset();
+        player.sprite = sprite;
+    });
 }
 
 function throwTimer(player,sprite){
@@ -262,9 +275,9 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     };
     this.player2.projectiles = [];
     
-
     this.player1.nemesis = this.player2;
     this.player2.nemesis = this.player1;
+
     //define scene variables
     this.upperbound = 70;
     this.lowerbound = canvas.height - 70;
