@@ -120,14 +120,49 @@ var manifest = {
 };
 
 var game = new Splat.Game(canvas, manifest);
-
+game.scores = {
+    player1 : {
+        health:0,
+        tomatosThrown: 0,
+        hotdogsThrown: 0,
+        spaghettiThrown: 0,
+        tomatosHit: 0,
+        hotdogsHit: 0,
+        spaghettiHit: 0
+    },
+    player2 : {
+        health:0,
+        tomatosThrown: 0,
+        hotdogsThrown: 0,
+        spaghettiThrown: 0,
+        tomatosHit: 0,
+        hotdogsHit: 0,
+        spaghettiHit: 0
+    }
+};
 function centerText(context, text, offsetX, offsetY) {
     var w = context.measureText(text).width;
     var x = offsetX + (canvas.width / 2) - (w / 2) | 0;
     var y = offsetY | 0;
     context.fillText(text, x, y);
 }
+function sendScores(player1,player2){
+    game.scores.player1.health = player1.health;
+    game.scores.player1.tomatosThrown = player1.arsenal[1].count;
+    game.scores.player1.hotdogsThrown = player1.arsenal[0].count;
+    game.scores.player1.spaghettiThrown = player1.arsenal[2].count;
+    game.scores.player1.tomatosHit = player1.arsenal[1].hit;
+    game.scores.player1.hotdogsHit = player1.arsenal[0].hit;
+    game.scores.player1.spaghettiHit = player1.arsenal[2].hit;
 
+    game.scores.player2.health = player2.health;
+    game.scores.player2.tomatosThrown = player2.arsenal[1].count;
+    game.scores.player2.hotdogsThrown = player2.arsenal[0].count;
+    game.scores.player2.spaghettiThrown = player2.arsenal[2].count;
+    game.scores.player2.tomatosHit = player2.arsenal[1].hit;
+    game.scores.player2.hotdogsHit = player2.arsenal[0].hit;
+    game.scores.player2.spaghettiHit = player2.arsenal[2].hit;
+}
 // Starts a throw by creating AnimatedEntity and giving it velocity.
 function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
     var projectile = new Splat.AnimatedEntity(
@@ -140,6 +175,7 @@ function chuck(player) { // TODO: will need to receive a 'weapon' attribute.
     projectile.vx = player.arsenal[player.selectedWeapon].velocity;
     projectile.vy = 0;
     projectile.impact = player.arsenal[player.selectedWeapon].impact;
+    player.arsenal[player.selectedWeapon].count +=1;
     player.projectiles.push(projectile);
 }
 
@@ -162,20 +198,30 @@ function collision(player, projectile) {
     player.health -= projectile.impact;
     console.log(player.sprite + "     :     " + player.health);
     if (player.health <= 0) {
-        endGame(player);
+        endGame(player,player.nemesis);
     }
 }
 
-function endGame(player) {
-    console.log(player.nemesis.sprite + " WINNSSSSSSS!!!!");
+function endGame(player1,player2) {
+    sendScores(player1,player2);
     game.scenes.switchTo("credits");
 }
-
+function hitType(player,projectile){
+    if(projectile.sprite.name.indexOf("tomato") > -1){
+        player.nemesis.arsenal[1].hit +=1;
+    }
+    if(projectile.sprite.name.indexOf("spaghetti") >-1){
+        player.nemesis.arsenal[2].hit +=1;
+    }
+    if(projectile.sprite.name.indexOf("hot") >-1){
+        player.nemesis.arsenal[0].hit +=1;
+    }
+}
 function hitting(player) {
     var projectiles = player.nemesis.projectiles;
     for(var i = 0; i< projectiles.length;i++){
     	if(player.collides(projectiles[i])){
-    	    console.log("OUCH!!!!");
+            hitType(player,projectiles[i]);
     	    game.sounds.play("player-hurt");
             collision(player, projectiles[i]);
     	    player.nemesis.projectiles.splice(i,1);
@@ -263,19 +309,25 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	    weapon:"hotdog",
 	    spriteHit:"hotdog",
 	    impact:10,
-	    velocity:0.8
+	    velocity:0.8,
+        count: 0,
+        hit: 0
 	},
 	{
 	    weapon:"tomato-1",
 	    spriteHit:"impactTomato-1Impact",
-	    impact:10,
-	    velocity:0.5
+	    impact:20,
+	    velocity:0.5,
+        count:0,
+        hit: 0
 	},
 	{
 	    weapon:"spaghetti-1",
 	    spriteHit:"impactSpaghetti-1Impact",
-	    impact:10,
-	    velocity:1.4
+	    impact:5,
+	    velocity:1.4,
+        count:0,
+        hit: 0
 	}
     ];
     this.player1.selectedWeapon = 0;
@@ -293,19 +345,25 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
 	    weapon:"hotdog",
 	    spriteHit:"hotdog",
 	    impact:10,
-	    velocity:-0.8
+	    velocity:-0.8,
+        count:0,
+        hit: 0
 	},
 	{
 	    weapon:"tomato-2",
 	    spriteHit:"impactTomato-2Impact",
-	    impact:10,
-	    velocity:-0.5
+	    impact:20,
+	    velocity:-0.5,
+        count:0,
+        hit: 0
 	},
 	{
 	    weapon:"spaghetti-2",
 	    spriteHit:"spaghetti-2Impact",
-	    impact:10,
-	    velocity:-1.4
+	    impact:5,
+	    velocity:-1.4,
+        count:0,
+        hit: 0
 	}
     ];
     this.player2.selectedWeapon = 0;
@@ -315,7 +373,7 @@ game.scenes.add("main", new Splat.Scene(canvas, function() {
     };
     this.player2.projectiles = [];
     this.player2.health = Number(game.playerHealth);
-    
+
     this.player1.nemesis = this.player2;
     this.player2.nemesis = this.player1;
 
@@ -449,16 +507,42 @@ game.scenes.add("credits", new Splat.Scene(canvas, function() {
     context.fillStyle = "#000000";
     context.fillRect(0,0,canvas.width,canvas.height);
 
-    context.fillStyle = "#0000ff";
+    context.fillStyle = "#ffffff";
     context.font = "25px helvetica bold";
-    centerText(context, "Programming by:", 0, 50 );
+    centerText(context, "Programming by:", 0, canvas.height - (250));
     context.font = "25px helvetica";
-    centerText(context, "Anthony Quisenberry:", 0, 100);
-    centerText(context, "Clay Morton", 0, 130);
+    centerText(context, "Anthony Quisenberry", 0,  canvas.height - (220));
+    centerText(context, "Clay Morton", 0,  canvas.height - (200));
     context.font = "25px helvetica bold";
-    centerText(context, "Art by:", 0, 200);
+    centerText(context, "Art by:", 0, canvas.height - (100));
     context.font = "25px helvetica ";
-    centerText(context, "Kira Winters", 0, 250);
+    centerText(context, "Kira Winters", 0, canvas.height - (70));
+    context.fillStyle = "#ff0000";
+    context.font = "20px helvetica bold";
+    centerText(context, "Player 1 Stats", -canvas.width/4, 20);
+    context.font = "20px helvetica";
+    centerText(context, "Health " + game.scores.player1.health, -canvas.width/4, 50);
+    centerText(context,"Tomatos thrown " + game.scores.player1.tomatosThrown,  -canvas.width/4, 100);
+    centerText(context,"Hotdogs thrown "+ game.scores.player1.hotdogsThrown,  -canvas.width/4, 150);
+    centerText(context,"Spaghettis thrown "+ game.scores.player1.spaghettiThrown,  -canvas.width/4, 200);
+    centerText(context,"Tomatos landed "+ game.scores.player1.tomatosHit,  -canvas.width/4, 250);
+    centerText(context,"Hotdogs landed "+ game.scores.player1.hotdogsHit,  -canvas.width/4, 300);
+    centerText(context,"Spaghettis landed "+ game.scores.player1.spaghettiHit, -canvas.width/4, 350);
+
+    context.fillStyle = "#0000ff";
+    context.font = "20px helvetica bold";
+    centerText(context, "Player 2 Stats:", canvas.width/4, 20);
+    context.font = "20px helvetica";
+    centerText(context,game.scores.player2.health+ " Health"  , canvas.width/4, 50);
+    centerText(context,game.scores.player2.tomatosThrown+" Tomatos thrown" ,  canvas.width/4, 100);
+    centerText(context, game.scores.player2.hotdogsThrown+" Hotdogs thrown" ,  canvas.width/4, 150);
+    centerText(context,game.scores.player2.spaghettiThrown+" Spaghettis thrown" ,  canvas.width/4, 200);
+    centerText(context,game.scores.player2.tomatosHit+" Tomatos landed" ,  canvas.width/4, 250);
+    centerText(context,game.scores.player2.hotdogsHit+" Hotdogs landed" ,  canvas.width/4, 300);
+    centerText(context,game.scores.player2.spaghettiHit+" Spaghettis landed" , canvas.width/4, 350);
+
+
+
 }));
 
 game.scenes.switchTo("loading");
